@@ -10,7 +10,7 @@ import type { AuthDto } from './dto/auth.dto'
 export class AuthService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async signUp(dto: AuthDto): Promise<User> {
+  async signUp(dto: AuthDto): Promise<Omit<User, 'password'>> {
     try {
       const salt = await bcrypt.genSalt()
       const hashedPassword = await bcrypt.hash(dto.password, salt)
@@ -21,6 +21,7 @@ export class AuthService {
         },
       })
 
+      delete newUser.password
       return newUser
     } catch (err: any) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -32,7 +33,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: AuthDto): Promise<User> {
+  async login(dto: AuthDto): Promise<Omit<User, 'password'>> {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
@@ -46,6 +47,7 @@ export class AuthService {
 
       if (!isValid) throw new ForbiddenException('Email or password incorrect')
 
+      delete user.password
       return user
     } catch (err: any) {
       return err.message
