@@ -1,5 +1,4 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import type { User } from '@prisma/client'
 import { Prisma } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
@@ -9,10 +8,7 @@ import type { AuthDto } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(ConfigService) private readonly config: ConfigService,
-  ) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async signUp(dto: AuthDto): Promise<User> {
     try {
@@ -36,7 +32,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: AuthDto) {
+  async login(dto: AuthDto): Promise<User> {
     try {
       const user = await this.prisma.user.findUnique({
         where: {
